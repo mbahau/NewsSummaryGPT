@@ -122,5 +122,5 @@ for day in range(0,1):
   print(completion.choices[0].message.content)
 
   # saving the LLM model output
-  with open('myfile.txt', 'w') as f:
+  with open('myfile.t xt' , 'w') as f:
     f.write(my_string)
