@@ -24,9 +24,7 @@ for day in range(0,1):
 
   query = str(currentdate['DateM'].values[0]) + " top news India"
 
-  currentdate['Date'] = currentdate['Date'] + pd.offsets.Day(-1)
-  currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %B %Y')
-  currentdate.to_parquet('currentdate.parquet')
+ 
 
   fetched_urls  = []
   result ="Below information is the google search of : " + query + ". From the below reults, give the recommendation which is(are) the best result(s) i got.\n"
@@ -77,7 +75,7 @@ for day in range(0,1):
   final_urls = [] 
   for rec_url in recommendation_final:
       for tu in fetched_urls:
-          print(tu)
+          # print(tu)
           if rec_url in tu:
               # print(tu)
               final_urls.append(tu)
@@ -85,7 +83,12 @@ for day in range(0,1):
 
   i=0
   content  = ""
+  ref_url = ""
   for urltmp in final_urls:
+      
+      # reference url 
+      ref_url = ref_url + str(urltmp) + "\n"
+
       # Specify the URL of the website you want to scrape
       url = urltmp  # Replace with the actual URL
 
@@ -125,6 +128,16 @@ for day in range(0,1):
   # saving the LLM model output
   data = "News of "+str(currentdate['DateM'].values[0])+'\n\n'
   data =  data + str(completion.choices[0].message.content)
+
+  # need to provide the reference of the source news 
+  data = data +"\n\n"
+  data = data + "Reference:\n" + ref_url
+  print("*** URLs:", ref_url)
+
   with open('Output/'+str(currentdate['Date'].values[0])[:10]+'.txt' , 'w') as f:
     f.write(data)
     del data
+
+  currentdate['Date'] = currentdate['Date'] + pd.offsets.Day(-1)
+  currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %B %Y')
+  currentdate.to_parquet('currentdate.parquet')
