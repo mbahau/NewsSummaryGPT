@@ -8,25 +8,26 @@ from googlesearch import search
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 # Point to the local server
 client = OpenAI(base_url="http://localhost:1234/v1", api_key="not-needed")
 
-
-try:
-  currentdate = pd.read_parquet('currentdate.parquet')
-else:
-  currentdate = pd.DataFrame([pd.to_datetime("31-01-2024")], columns = ['Date'] )
-  currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %b %Y')
-
-
-query = str(currentdate['DateM'].values[0]) + " top news India"
-
-currentdate['Date'] = currentdate['Date'] + pd.offsets.Day(-1)
-currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %b %Y')
-currentdate.to_parquet('currentdate.parquet')
-
 for day in range(0,1):
+
+  try:
+    currentdate = pd.read_parquet('currentdate.parquet')
+  except:
+    currentdate = pd.DataFrame([pd.to_datetime("31-01-2024")], columns = ['Date'] )
+    currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %B %Y')
+
+
+  query = str(currentdate['DateM'].values[0]) + " top news India"
+
+  currentdate['Date'] = currentdate['Date'] + pd.offsets.Day(-1)
+  currentdate['DateM'] = currentdate['Date'].dt.strftime('%d %B %Y')
+  currentdate.to_parquet('currentdate.parquet')
+
   fetched_urls  = []
   result ="Below information is the google search of : " + query + ". From the below reults, give the recommendation which is(are) the best result(s) i got.\n"
   i=1
@@ -118,9 +119,12 @@ for day in range(0,1):
     ],
     temperature=0.7,
   )
-
+  del result
   print(completion.choices[0].message.content)
 
   # saving the LLM model output
-  with open('myfile.t xt' , 'w') as f:
-    f.write(my_string)
+  data = "News of "+str(currentdate['DateM'].values[0])+'\n\n'
+  data =  data + str(completion.choices[0].message.content)
+  with open('Output/'+str(currentdate['Date'].values[0])[:10]+'.txt' , 'w') as f:
+    f.write(data)
+    del data
