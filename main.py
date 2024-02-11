@@ -13,7 +13,7 @@ import pandas as pd
 # Point to the local server
 client = OpenAI(base_url="http://localhost:1234/v1", api_key="not-needed")
 
-for day in range(0,1):
+for day in range(0,31):
 
   try:
     currentdate = pd.read_parquet('currentdate.parquet')
